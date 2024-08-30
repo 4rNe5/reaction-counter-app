@@ -2,19 +2,10 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import EditScreenInfo from './EditScreenInfo';
 
-type ScreenContentProps = {
-  title: string;
-  path: string;
-  children?: React.ReactNode;
-};
-
-export const ScreenContent = ({ title, path, children }: ScreenContentProps) => {
+export const ScreenContent = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <View style={styles.separator} />
-      <EditScreenInfo path={path} />
-      {children}
+      <Text style={styles.title}>로딩중입니다...</Text>
     </View>
   );
 };
