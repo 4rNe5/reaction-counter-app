@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: '#404040',
   },
   separator: {
     backgroundColor: '#d1d5db',
