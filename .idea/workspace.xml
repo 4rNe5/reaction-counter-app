@@ -7,7 +7,9 @@
     <list default="true" id="32aabaa9-5759-4df3-a3a0-4291fe9fc76e" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/api.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/eas.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/navigation/tab-navigator.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/tab-navigator.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screens/MyRecordView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/screens/MyRecordView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screens/RankingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/screens/RankingView.tsx" afterDir="false" />
@@ -71,7 +73,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1725031776791</updated>
-      <workItem from="1725031781153" duration="33541000" />
+      <workItem from="1725031781153" duration="33857000" />
     </task>
     <servers />
   </component>
