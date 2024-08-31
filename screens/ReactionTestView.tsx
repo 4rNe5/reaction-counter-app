@@ -1,8 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, InteractionManager, PanResponder } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, InteractionManager, PanResponder, Animated } from "react-native";
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MyRecordView from './MyRecordView';
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 interface ReactionResult {
@@ -22,6 +21,9 @@ export default function ReactionTestView() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const frameRef = useRef<number | null>(null);
 
+  // Animated value for the notice position
+  const noticeTranslateY = useRef(new Animated.Value(-100)).current; // 초기값을 화면 위로 설정
+
   useEffect(() => {
     const checkUserName = async () => {
       try {
@@ -40,7 +42,11 @@ export default function ReactionTestView() {
     const userNameListener = async () => {
       const userName = await AsyncStorage.getItem(USERNAME_KEY);
       if (userName) {
-        setShowNotice(false);
+        Animated.timing(noticeTranslateY, {
+          toValue: -100, // Move notice up off the screen
+          duration: 300, // 300ms animation
+          useNativeDriver: true,
+        }).start(() => setShowNotice(false)); // Hide notice after animation
       }
     };
 
@@ -56,7 +62,18 @@ export default function ReactionTestView() {
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, []);
+  }, [noticeTranslateY]);
+
+  // Add the effect for the slide down animation when notice appears
+  useEffect(() => {
+    if (showNotice) {
+      Animated.timing(noticeTranslateY, {
+        toValue: 0, // Move notice to its original position
+        duration: 300, // 300ms animation for the sliding down effect
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showNotice, noticeTranslateY]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -65,9 +82,25 @@ export default function ReactionTestView() {
         return Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
       },
       onPanResponderMove: (evt, gestureState) => {
-        // If swipe up, hide the notice
+        // Adjust notice position based on swipe gesture
+        if (gestureState.dy < 0) {
+          noticeTranslateY.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // If swipe is strong enough, hide the notice with an animation
         if (gestureState.dy < -50) {
-          setShowNotice(false);
+          Animated.timing(noticeTranslateY, {
+            toValue: -100, // Move notice up off the screen
+            duration: 300, // 300ms animation
+            useNativeDriver: true,
+          }).start(() => setShowNotice(false)); // Hide notice after animation
+        } else {
+          // If swipe is not strong enough, return to original position
+          Animated.spring(noticeTranslateY, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
         }
       },
     })
@@ -147,28 +180,30 @@ export default function ReactionTestView() {
   return (
     <View style={styles.container}>
       {showNotice && (
-        <View style={styles.noticeContainer} {...panResponder.panHandlers}>
-
+        <Animated.View
+          style={[styles.noticeContainer, { transform: [{ translateY: noticeTranslateY }] }]}
+          {...panResponder.panHandlers}
+        >
           <View style={styles.noticeTitlecontainer}>
             <FontAwesome6 name="circle-exclamation" size={22} color={'#ff390d'} />
-            <Text style={styles.noticeTitle}>중요한 알림!</Text>
+            <Text style={styles.noticeTitle}>서비스 알림!</Text>
           </View>
 
           <Text style={styles.noticeText}>
-            닉네임을 설정해주세요!
+            사용 전, 본인의 닉네임을 설정해주세요!
           </Text>
           <Text style={styles.noticeText}>
             설정 페이지에서 닉네임을 설정할 수 있습니다.
           </Text>
-        </View>
+        </Animated.View>
       )}
 
-      {state === 'result' && <Image source={require('../assets/Fire.png')} style={{ width: 175, height: 175, marginBottom: 25, marginTop: -50}} />}
+      {state === 'result' && <Image source={require('../assets/Fire.png')} style={{ width: 175, height: 175, marginBottom: 25, marginTop: -50 }} />}
       <Text style={styles.titleFont}>
         {state === 'ready' && '아래 버튼을 눌러'}
         {state === 'waiting' && '초록색이 되는 순간'}
         {state === 'click' && '탭하세요!'}
-        {state === 'result' && '당신의 반응 시간은'}
+        {state === 'result' && '당신의 반응 속도는'}
         {state === 'tooEarly' && '너무 빨리 탭했습니다!'}
       </Text>
 
@@ -235,7 +270,7 @@ const styles = StyleSheet.create({
     top: 50,
     backgroundColor: '#ffd5cc',
     padding: 15,
-    marginTop: 15,
+    marginTop: 20,
     borderRadius: 10,
   },
   noticeText: {
@@ -274,8 +309,8 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#ea411b',
     padding: 15,
-    width: 220,
-    height: 220,
+    width: 240,
+    height: 240,
     borderRadius: 120,
     marginTop: 20,
     minWidth: 150,

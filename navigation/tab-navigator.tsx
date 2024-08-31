@@ -34,7 +34,7 @@ export default function TabLayout({ navigation }: Props) {
         name="ReactionTestView"
         component={ReactionTestView}
         options={{
-          title: '테스트하기',
+          title: '측정하기',
           tabBarLabelStyle: {
             fontSize: 11,
             marginTop: -5,
@@ -64,7 +64,7 @@ export default function TabLayout({ navigation }: Props) {
         name="Three"
         component={RankingView}
         options={{
-          title: '랭킹보기',
+          title: '랭킹',
           tabBarLabelStyle: {
             fontSize: 11,
             marginTop: -5,

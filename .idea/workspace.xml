@@ -5,25 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="32aabaa9-5759-4df3-a3a0-4291fe9fc76e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/assets/Fire.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/Loader.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/SettingButton.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screens/MyRecordView.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/screens/SettingView.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/BackButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/Button.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/Container.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/EditScreenInfo.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/HeaderButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ScreenContent.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/TabBarIcon.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/navigation/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/navigation/tab-navigator.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/navigation/tab-navigator.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/MyRecordView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/screens/MyRecordView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/screens/RankingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/screens/RankingView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/screens/ReactionTestView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/screens/ReactionTestView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/screens/modal.tsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +71,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1725031776791</updated>
-      <workItem from="1725031781153" duration="30006000" />
+      <workItem from="1725031781153" duration="33541000" />
     </task>
     <servers />
   </component>
@@ -92,5 +80,17 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/screens/MyRecordView.tsx</url>
+          <line>105</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

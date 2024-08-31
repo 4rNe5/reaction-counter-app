@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface ReactionResult {
   time: number;
@@ -8,10 +9,6 @@ interface ReactionResult {
 }
 
 const STORAGE_KEY = '@reaction_results';
-
-interface ResultListViewProps {
-  onBack: () => void;
-}
 
 export default function MyRecordView() {
   const [results, setResults] = useState<ReactionResult[]>([]);
@@ -28,9 +25,12 @@ export default function MyRecordView() {
     }
   };
 
-  useEffect(() => {
-    loadResults();
-  }, []);
+  // Use useFocusEffect to reload the data whenever the view is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      loadResults();
+    }, [])
+  );
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -46,7 +46,9 @@ export default function MyRecordView() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleFont}>내 기록보기</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleFont}>내 측정기록 보기</Text>
+      </View>
       <FlatList
         data={results}
         renderItem={renderItem}
@@ -71,19 +73,23 @@ const styles = StyleSheet.create({
   titleFont: {
     fontFamily: 'NeoDunggeunmoPro',
     color: '#d3d3d3',
-    fontSize: 42,
-    marginBottom: 30,
+    fontSize: 38,
+    marginBottom: 20,
     textAlign: 'center',
     marginTop: 100,
   },
-
   msText: {
-    fontSize: 22,
+    fontSize: 24,
+    color: '#ffffff',
   },
-
+  titleContainer: {
+    marginRight: 'auto',
+    marginLeft: 5,
+  },
   resultList: {
     width: '100%',
     paddingVertical: 10,
+    marginBottom: 90,
   },
   resultItem: {
     flexDirection: 'row',
@@ -92,15 +98,15 @@ const styles = StyleSheet.create({
     marginVertical: 7,
     padding: 15,
     backgroundColor: '#404040',
-    borderRadius: 8,
+    borderRadius: 10,
   },
   resultItemTime: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: 'NeoDunggeunmoPro',
     color: '#ffffff',
   },
   resultItemDate: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'NeoDunggeunmoPro',
     color: '#b8b8b8',
   },
