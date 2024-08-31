@@ -1,8 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import EditScreenInfo from './EditScreenInfo';
-
-export const ScreenContent = () => {
+export const Loader = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>로딩중입니다...</Text>
