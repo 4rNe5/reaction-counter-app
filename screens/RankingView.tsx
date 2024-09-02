@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList } from "react-native";
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, View, Text, FlatList, RefreshControl } from "react-native";
 import PocketBase from 'pocketbase';
 import { API_URL } from "../api";
 import { useFocusEffect } from '@react-navigation/native';
@@ -13,24 +13,30 @@ interface RankingItem {
 
 export default function RankingView() {
   const pb = new PocketBase(API_URL);
-  const [ranking, setRanking] = React.useState<RankingItem[]>([]);
+  const [ranking, setRanking] = useState<RankingItem[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchRanking = async () => {
+    try {
+      const result = await pb.collection('reaction_records').getFullList({
+        sort: 'reactionMs',
+      });
+      setRanking(result);
+    } catch (error) {
+      console.error("Failed to fetch ranking:", error);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      const fetchRanking = async () => {
-        try {
-          const result = await pb.collection('reaction_records').getFullList({
-            sort: 'reactionMs',
-          });
-          setRanking(result);
-        } catch (error) {
-          console.error("Failed to fetch ranking:", error);
-        }
-      };
-
       fetchRanking();
     }, [])
   );
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchRanking().then(() => setRefreshing(false));
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -60,11 +66,17 @@ export default function RankingView() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.titleFont}>반응속도 랭킹</Text>
+      </View>
       <FlatList
         data={ranking}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );
@@ -73,20 +85,40 @@ export default function RankingView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#232323',
-    paddingTop: 80,
+    padding: 10,
+  },
+  titleFont: {
+    fontFamily: 'NeoDunggeunmoPro',
+    color: '#d3d3d3',
+    fontSize: 38,
+    marginBottom: 20,
+    textAlign: 'center',
+    marginTop: 110,
+  },
+  msText: {
+    fontSize: 24,
+    color: '#ffffff',
+  },
+  titleContainer: {
+    marginRight: 'auto',
+    marginLeft: 15, // MyRecordView와 동일하게 수정
   },
   listContainer: {
-    padding: 10,
+    width: '100%',
+    paddingVertical: 10,
+    marginBottom: 90,
   },
   itemContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#333',
-    borderRadius: 5,
+    padding: 15,
+    marginVertical: 7,
+    backgroundColor: '#404040',
+    borderRadius: 10,
   },
   topThree: {
     backgroundColor: '#4a4a4a',
@@ -94,29 +126,35 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: 68,
   },
   rightContent: {
     alignItems: 'flex-end',
+    paddingLeft: 68,
   },
   rank: {
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 10,
     color: '#fff',
+    fontFamily: 'NeoDunggeunmoPro',
   },
   username: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#fff',
+    fontFamily: 'NeoDunggeunmoPro',
   },
   reactionTime: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+    fontFamily: 'NeoDunggeunmoPro',
   },
   date: {
-    fontSize: 12,
-    color: '#bbb',
+    fontSize: 15,
+    color: '#b8b8b8',
     marginTop: 5,
+    fontFamily: 'NeoDunggeunmoPro',
   },
   topThreeText: {
     color: '#ffd700',
