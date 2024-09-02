@@ -2,7 +2,7 @@
   "expo": {
     "name": "탁!",
     "slug": "reaction-counter-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -32,7 +32,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dev.4rne5.reaction-counter"
+      "bundleIdentifier": "dev.4rne5.reaction-counter",
+      "icon": "./assets/icon.png"
     },
     "android": {
       "adaptiveIcon": {
@@ -44,6 +45,12 @@
       "eas": {
         "projectId": "5cb264ef-20ea-4a8a-9c6e-c0deaf53b6e6"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/5cb264ef-20ea-4a8a-9c6e-c0deaf53b6e6"
     }
   }
 }
