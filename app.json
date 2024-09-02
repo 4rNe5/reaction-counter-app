@@ -31,7 +31,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "dev.4rne5.reaction-counter",
       "icon": "./assets/icon.png"
     },
