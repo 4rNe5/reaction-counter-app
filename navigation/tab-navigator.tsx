@@ -19,7 +19,8 @@ export default function TabLayout({ navigation }: Props) {
         tabBarActiveTintColor: '#ea411b',
         tabBarStyle: {
           height: 100, // 전체 탭바의 높이를 증가
-          borderRadius: 30,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
           backgroundColor: '#323232',
           borderTopColor: 'transparent',
           position: 'absolute',
