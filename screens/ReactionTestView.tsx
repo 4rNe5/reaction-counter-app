@@ -1,8 +1,18 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, InteractionManager, PanResponder, Animated } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  InteractionManager,
+  PanResponder,
+  Animated,
+  Alert
+} from "react-native";
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import PocketBase from "pocketbase";
 
 interface ReactionResult {
   time: number;
@@ -21,8 +31,7 @@ export default function ReactionTestView() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const frameRef = useRef<number | null>(null);
 
-  // Animated value for the notice position
-  const noticeTranslateY = useRef(new Animated.Value(-100)).current; // 초기값을 화면 위로 설정
+  const noticeTranslateY = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
     const checkUserName = async () => {
@@ -38,19 +47,17 @@ export default function ReactionTestView() {
 
     checkUserName();
 
-    // Listener to detect updates to the username
     const userNameListener = async () => {
       const userName = await AsyncStorage.getItem(USERNAME_KEY);
       if (userName) {
         Animated.timing(noticeTranslateY, {
-          toValue: -100, // Move notice up off the screen
-          duration: 300, // 300ms animation
+          toValue: -100,
+          duration: 300,
           useNativeDriver: true,
-        }).start(() => setShowNotice(false)); // Hide notice after animation
+        }).start(() => setShowNotice(false));
       }
     };
 
-    // Watch for changes in the AsyncStorage
     const interval = setInterval(userNameListener, 1000);
 
     return () => {
@@ -64,12 +71,11 @@ export default function ReactionTestView() {
     };
   }, [noticeTranslateY]);
 
-  // Add the effect for the slide down animation when notice appears
   useEffect(() => {
     if (showNotice) {
       Animated.timing(noticeTranslateY, {
-        toValue: 0, // Move notice to its original position
-        duration: 300, // 300ms animation for the sliding down effect
+        toValue: 0,
+        duration: 300,
         useNativeDriver: true,
       }).start();
     }
@@ -78,25 +84,21 @@ export default function ReactionTestView() {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Enable pan responder only for vertical swipe gestures
         return Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
       },
       onPanResponderMove: (evt, gestureState) => {
-        // Adjust notice position based on swipe gesture
         if (gestureState.dy < 0) {
           noticeTranslateY.setValue(gestureState.dy);
         }
       },
       onPanResponderRelease: (evt, gestureState) => {
-        // If swipe is strong enough, hide the notice with an animation
         if (gestureState.dy < -50) {
           Animated.timing(noticeTranslateY, {
-            toValue: -100, // Move notice up off the screen
-            duration: 300, // 300ms animation
+            toValue: -100,
+            duration: 300,
             useNativeDriver: true,
-          }).start(() => setShowNotice(false)); // Hide notice after animation
+          }).start(() => setShowNotice(false));
         } else {
-          // If swipe is not strong enough, return to original position
           Animated.spring(noticeTranslateY, {
             toValue: 0,
             useNativeDriver: true,
@@ -177,6 +179,37 @@ export default function ReactionTestView() {
     }
   }, [state, startTest, handleClick, reset]);
 
+  const handleSaveButtonPress = useCallback(async () => {
+    try {
+      const userName = await AsyncStorage.getItem(USERNAME_KEY);
+      if (!userName) {
+        Alert.alert('닉네임이 설정되지 않았어요!', '설정 페이지에서 닉네임을 설정해주세요.');
+        return;
+      }
+
+      if (reactionTime === null) {
+        Alert.alert('오류', '반응 속도가 없습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      const pb = new PocketBase('https://reaction-counter.fly.dev');
+      const data = { userName: userName, reactionMs: reactionTime };
+
+      try {
+        const record = await pb.collection('reaction_records').create(data);
+        if (record) {
+          Alert.alert('저장 성공', '기록이 성공적으로 저장되었습니다!');
+        }
+      } catch (error) {
+        Alert.alert('저장 오류', '기록 저장에 실패했습니다. 나중에 다시 시도해주세요.');
+        console.error('Save operation failed', error);
+      }
+    } catch (error) {
+      Alert.alert('오류', '기록 저장 중 문제가 발생했습니다. 나중에 다시 시도해주세요.');
+      console.error('Save operation failed', error);
+    }
+  }, [reactionTime]);
+
   return (
     <View style={styles.container}>
       {showNotice && (
@@ -235,6 +268,13 @@ export default function ReactionTestView() {
           {(state === 'result' || state === 'tooEarly') && '다시하기!'}
         </Text>
       </TouchableOpacity>
+
+      {/* 기록 저장하기 버튼 */}
+      {(state === 'result') && (
+        <TouchableOpacity style={styles.saveButton} onPress={handleSaveButtonPress}>
+          <Text style={styles.saveButtonText}>기록 저장하기!</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -272,6 +312,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginTop: 20,
     borderRadius: 10,
+    zIndex: 9999,
   },
   noticeText: {
     color: '#ff390d',
@@ -344,15 +385,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 28,
   },
-  resultListButton: {
-    marginTop: 20,
-    padding: 10,
+  saveButton: {
     backgroundColor: '#4A90E2',
-    borderRadius: 5,
+    padding: 15,
+    marginTop: 20,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  resultListButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  saveButtonText: {
     fontFamily: 'NeoDunggeunmoPro',
+    color: '#ffffff',
+    fontSize: 20,
   },
 });
+
