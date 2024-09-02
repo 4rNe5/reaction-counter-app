@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 68,
+    paddingRight: 65,
   },
   rightContent: {
     alignItems: 'flex-end',
-    paddingLeft: 68,
+    paddingLeft: 65,
   },
   rank: {
     fontSize: 18,
@@ -145,8 +145,7 @@ const styles = StyleSheet.create({
     fontFamily: 'NeoDunggeunmoPro',
   },
   reactionTime: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 21,
     color: '#fff',
     fontFamily: 'NeoDunggeunmoPro',
   },

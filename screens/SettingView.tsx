@@ -61,8 +61,7 @@ export default function RankingView() {
       </View>
 
       <View style={styles.section}>
-        <SettingButton title={'서비스 이용약관'} url={'https://example.com/terms-of-service'} />
-        <SettingButton title={'개인정보 처리방침'} url={'https://example.com/privacy-policy'} />
+        <SettingButton title={'개인정보 처리방침'} url={'https://4-rne5.notion.site/Action-1fbcffa1aad84bbea8820ded398f51d3?pvs=4'} />
       </View>
     </ScrollView>
   );
