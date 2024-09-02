@@ -22,7 +22,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.4rne5.reaction-counter"
     },
     "android": {
       "adaptiveIcon": {
