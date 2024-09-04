@@ -110,7 +110,7 @@ export default function ReactionTestView() {
 
   const startTest = useCallback(() => {
     setState('waiting');
-    const delay = Math.floor(Math.random() * 5000) + 1000;
+    const delay = Math.floor(Math.random() * 3000) + 1000;
     timeoutRef.current = setTimeout(() => {
       InteractionManager.runAfterInteractions(() => {
         setState('click');

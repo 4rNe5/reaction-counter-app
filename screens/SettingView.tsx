@@ -4,6 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import SettingButton from "../components/SettingButton";
 
+// 부적절한 단어 목록 (부적절하게 사용될 여지가 있는 단어는 모두 포함하였습니다. 거북한점 양해바랍니다.)
+const inappropriateWords = ['fuck', 'shit','애비','대소고','여성','칼찌','퐁퐁','느금마','섹스','보지', '장애인','앰생','교장','교감','박유현','오지석','자지','자지털','살인','보지털','니미럴','애미','한남','한녀','페미','메갈','좌파','우파','노무현','노무','고무통','MC무현','문재인','부엉이 바위','자살','운지','일베','일간베스트','루리웹','노무통','Rohmuhyon','ilbe','mcmh','sex','pussy','moonjaein','unji','kkalzzi'];
+
+// 닉네임이 적절한지 검사하는 함수
+const isAppropriateUsername = (username: string) => {
+  const lowercaseUsername = username.toLowerCase();
+  return !inappropriateWords.some(word => lowercaseUsername.includes(word));
+};
+
 export default function RankingView() {
   const [username, setUsername] = useState('');
   const [newUsername, setNewUsername] = useState('');
@@ -11,7 +20,7 @@ export default function RankingView() {
   useEffect(() => {
     const loadUsername = async () => {
       try {
-        const savedUsername = await AsyncStorage.getItem('@userName'); // Key: @userName
+        const savedUsername = await AsyncStorage.getItem('@userName');
         if (savedUsername) {
           setUsername(savedUsername);
           setNewUsername(savedUsername);
@@ -25,6 +34,16 @@ export default function RankingView() {
   }, []);
 
   const handleSaveUsername = async () => {
+    if (newUsername.trim().length === 0) {
+      Alert.alert('오류', '유저명을 입력해주세요.');
+      return;
+    }
+
+    if (!isAppropriateUsername(newUsername)) {
+      Alert.alert('부적절한 유저명', '부적절한 단어가 포함되어 있습니다. 다른 유저명을 선택해주세요.');
+      return;
+    }
+
     try {
       await AsyncStorage.setItem('@userName', newUsername);
       setUsername(newUsername);
@@ -109,7 +128,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     height: 50,
     justifyContent: 'center',
-    alignItems: 'center',
     flexDirection: 'row',
   },
   buttonText: {

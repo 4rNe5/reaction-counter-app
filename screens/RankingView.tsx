@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   listContainer: {
     width: '100%',
     paddingVertical: 10,
-    marginBottom: 90,
+    paddingBottom: 150,
   },
   itemContainer: {
     flexDirection: 'row',
@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 65,
+    paddingRight: 20,
   },
   rightContent: {
     alignItems: 'flex-end',
-    paddingLeft: 65,
+    paddingLeft: 10,
   },
   rank: {
     fontSize: 18,
