@@ -2,7 +2,7 @@
   "expo": {
     "name": "탁!",
     "slug": "reaction-counter-app",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "web": {
       "favicon": "./assets/favicon.png"
     },
