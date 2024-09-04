@@ -3,14 +3,12 @@ import { View, StyleSheet, Text, TextInput, TouchableOpacity, Linking, Alert, Sc
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import SettingButton from "../components/SettingButton";
-
-// 부적절한 단어 목록 (부적절하게 사용될 여지가 있는 단어는 모두 포함하였습니다. 거북한점 양해바랍니다.)
-const inappropriateWords = ['fuck', 'shit','애비','대소고','여성','칼찌','퐁퐁','느금마','섹스','보지', '장애인','앰생','교장','교감','박유현','오지석','자지','자지털','살인','보지털','니미럴','애미','한남','한녀','페미','메갈','좌파','우파','노무현','노무','고무통','MC무현','문재인','부엉이 바위','자살','운지','일베','일간베스트','루리웹','노무통','Rohmuhyon','ilbe','mcmh','sex','pussy','moonjaein','unji','kkalzzi'];
+import { BAD_WORD_LIST } from "../BAD_WORD_LIST";
 
 // 닉네임이 적절한지 검사하는 함수
 const isAppropriateUsername = (username: string) => {
   const lowercaseUsername = username.toLowerCase();
-  return !inappropriateWords.some(word => lowercaseUsername.includes(word));
+  return !BAD_WORD_LIST.some(word => lowercaseUsername.includes(word));
 };
 
 export default function RankingView() {
