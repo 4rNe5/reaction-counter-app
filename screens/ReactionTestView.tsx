@@ -29,6 +29,7 @@ export default function ReactionTestView() {
   const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // New state to track if the record is saved
   const startTimeRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -177,6 +178,7 @@ export default function ReactionTestView() {
     }
     setState('ready');
     setReactionTime(null);
+    setIsSaved(false); // Reset the save status
     startTimeRef.current = 0;
     buttonPressedRef.current = false;
     buttonHeldDuringWaitingRef.current = false; // Reset the flag
@@ -200,6 +202,11 @@ export default function ReactionTestView() {
   }, [state, startTest, handleClick, reset]);
 
   const handleSaveButtonPress = useCallback(async () => {
+    if (isSaved) {
+      Alert.alert('이미 저장된 기록입니다.', '기록은 한 번만 저장할 수 있습니다.');
+      return;
+    }
+
     try {
       const userName = await AsyncStorage.getItem(USERNAME_KEY);
       if (!userName) {
@@ -218,6 +225,7 @@ export default function ReactionTestView() {
       try {
         const record = await pb.collection('reaction_records').create(data);
         if (record) {
+          setIsSaved(true); // Update the save status
           Alert.alert('저장 성공', '기록이 성공적으로 저장되었습니다!');
         }
       } catch (error) {
@@ -228,7 +236,7 @@ export default function ReactionTestView() {
       Alert.alert('오류', '기록 저장 중 문제가 발생했습니다. 나중에 다시 시도해주세요.');
       console.error('Save operation failed', error);
     }
-  }, [reactionTime]);
+  }, [reactionTime, isSaved]);
 
   return (
     <View style={styles.container}>

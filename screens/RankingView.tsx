@@ -41,7 +41,7 @@ export default function RankingView() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    date.setHours(date.getHours() + 9); // Convert to Korean time
+    date.setHours(date.getHours()); // Convert to Korean time
     return date.toLocaleString('ko-KR', {
       year: '2-digit',
       month: '2-digit',

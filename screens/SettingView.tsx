@@ -68,7 +68,8 @@ export default function RankingView() {
           style={styles.input}
           value={newUsername}
           onChangeText={setNewUsername}
-          placeholder="새로운 유저명을 입력해주세요."
+          placeholder="공백 포함 12자까지 가능합니다."
+          maxLength={12}
           placeholderTextColor="#8e8e8e"
         />
         <TouchableOpacity style={styles.button} onPress={handleSaveUsername}>
