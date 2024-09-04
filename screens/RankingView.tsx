@@ -21,6 +21,7 @@ export default function RankingView() {
       const result = await pb.collection('reaction_records').getFullList({
         sort: 'reactionMs',
       });
+      // @ts-ignore
       setRanking(result);
     } catch (error) {
       console.error("Failed to fetch ranking:", error);
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   leftContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 20,
+    paddingRight: 12,
   },
   rightContent: {
     alignItems: 'flex-end',

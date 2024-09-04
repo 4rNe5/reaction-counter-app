@@ -21,14 +21,19 @@ interface ReactionResult {
 
 const STORAGE_KEY = '@reaction_results';
 const USERNAME_KEY = '@userName';
+const MIN_REACTION_TIME = 80; // Minimum reaction time threshold in milliseconds
+const REACTION_TIME_ADJUSTMENT = 60; // Adjustment value in milliseconds
 
 export default function ReactionTestView() {
-  const [state, setState] = useState<'ready' | 'waiting' | 'click' | 'result' | 'tooEarly' | 'failed'>('ready');  const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [state, setState] = useState<'ready' | 'waiting' | 'click' | 'result' | 'tooEarly' | 'failed'>('ready');
+  const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   const startTimeRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const frameRef = useRef<number | null>(null);
+  const buttonPressedRef = useRef(false);
+  const buttonHeldDuringWaitingRef = useRef(false); // New flag to track if button is held during waiting
 
   const noticeTranslateY = useRef(new Animated.Value(-100)).current;
 
@@ -109,30 +114,38 @@ export default function ReactionTestView() {
 
   const startTest = useCallback(() => {
     setState('waiting');
+    buttonPressedRef.current = false;
+    buttonHeldDuringWaitingRef.current = false; // Reset the flag
     const delay = Math.floor(Math.random() * 3000) + 1000;
     timeoutRef.current = setTimeout(() => {
       InteractionManager.runAfterInteractions(() => {
-        setState('click');
-        frameRef.current = requestAnimationFrame(() => {
-          startTimeRef.current = performance.now();
-        });
+        if (buttonHeldDuringWaitingRef.current) {
+          setState('failed');
+        } else {
+          setState('click');
+          frameRef.current = requestAnimationFrame(() => {
+            startTimeRef.current = performance.now();
+          });
+        }
       });
     }, delay);
   }, []);
 
   const handleClick = useCallback(() => {
-    if (state === 'click') {
+    if (state === 'click' && !buttonPressedRef.current) {
+      buttonPressedRef.current = true;
       const endTime = performance.now();
-      const newReactionTime = Math.round(endTime - startTimeRef.current) - 100;
-      if (newReactionTime < 0) {
-        setReactionTime(null);
+      let newReactionTime = Math.round(endTime - startTimeRef.current) - REACTION_TIME_ADJUSTMENT; // Apply adjustment
+      if (newReactionTime <= 0 || newReactionTime < MIN_REACTION_TIME) {
         setState('failed');
+        setReactionTime(null);
       } else {
         setReactionTime(newReactionTime);
         setState('result');
         saveResult(newReactionTime);
       }
     } else if (state === 'waiting') {
+      buttonHeldDuringWaitingRef.current = true; // Set the flag if button is held during waiting
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -165,6 +178,8 @@ export default function ReactionTestView() {
     setState('ready');
     setReactionTime(null);
     startTimeRef.current = 0;
+    buttonPressedRef.current = false;
+    buttonHeldDuringWaitingRef.current = false; // Reset the flag
   }, []);
 
   const handleButtonPress = useCallback(() => {
@@ -178,6 +193,7 @@ export default function ReactionTestView() {
         break;
       case 'result':
       case 'tooEarly':
+      case 'failed':
         reset();
         break;
     }
@@ -242,7 +258,7 @@ export default function ReactionTestView() {
         {state === 'click' && '탭하세요!'}
         {state === 'result' && '당신의 반응 속도는'}
         {state === 'tooEarly' && '너무 빨리 탭했습니다!'}
-        {state === 'failed' && '측정에 실패했습니다!'}
+        {state === 'failed' && '측정 실패!'}
       </Text>
 
       <Text style={styles.titleFont_2}>
@@ -263,6 +279,11 @@ export default function ReactionTestView() {
           (state === 'result' || state === 'tooEarly' || state === 'failed') && styles.restartButton,
         ]}
         onPress={handleButtonPress}
+        onPressIn={() => {
+          if (state === 'waiting') {
+            buttonHeldDuringWaitingRef.current = true; // Set the flag if button is pressed during waiting
+          }
+        }}
       >
         <Text style={[
           styles.buttonText,
@@ -405,4 +426,3 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
-
