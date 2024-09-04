@@ -23,8 +23,7 @@ const STORAGE_KEY = '@reaction_results';
 const USERNAME_KEY = '@userName';
 
 export default function ReactionTestView() {
-  const [state, setState] = useState<'ready' | 'waiting' | 'click' | 'result' | 'tooEarly'>('ready');
-  const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [state, setState] = useState<'ready' | 'waiting' | 'click' | 'result' | 'tooEarly' | 'failed'>('ready');  const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   const startTimeRef = useRef(0);
@@ -124,10 +123,15 @@ export default function ReactionTestView() {
   const handleClick = useCallback(() => {
     if (state === 'click') {
       const endTime = performance.now();
-      const newReactionTime = Math.round(endTime - startTimeRef.current);
-      setReactionTime(newReactionTime - 100);
-      setState('result');
-      saveResult(newReactionTime - 100);
+      const newReactionTime = Math.round(endTime - startTimeRef.current) - 100;
+      if (newReactionTime < 0) {
+        setReactionTime(null);
+        setState('failed');
+      } else {
+        setReactionTime(newReactionTime);
+        setState('result');
+        saveResult(newReactionTime);
+      }
     } else if (state === 'waiting') {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -238,11 +242,13 @@ export default function ReactionTestView() {
         {state === 'click' && '탭하세요!'}
         {state === 'result' && '당신의 반응 속도는'}
         {state === 'tooEarly' && '너무 빨리 탭했습니다!'}
+        {state === 'failed' && '측정에 실패했습니다!'}
       </Text>
 
       <Text style={styles.titleFont_2}>
         {state === 'ready' && '테스트를 시작하세요!'}
         {state === 'waiting' && '빠르게 탭하세요!'}
+        {state === 'failed' && '다시 시도해주세요.'}
       </Text>
 
       {state === 'result' && (
@@ -254,18 +260,18 @@ export default function ReactionTestView() {
           styles.button,
           state === 'click' && styles.greenButton,
           state === 'tooEarly' && styles.redButton,
-          (state === 'result' || state === 'tooEarly') && styles.restartButton,
+          (state === 'result' || state === 'tooEarly' || state === 'failed') && styles.restartButton,
         ]}
         onPress={handleButtonPress}
       >
         <Text style={[
           styles.buttonText,
-          state === 'result' && styles.buttonResultText,
+          (state === 'result' || state === 'failed') && styles.buttonResultText,
         ]}>
           {state === 'ready' && '시작하기!'}
           {state === 'waiting' && '대기 중...'}
           {state === 'click' && '텝하세요!'}
-          {(state === 'result' || state === 'tooEarly') && '다시하기!'}
+          {(state === 'result' || state === 'tooEarly' || state === 'failed') && '다시하기!'}
         </Text>
       </TouchableOpacity>
 
