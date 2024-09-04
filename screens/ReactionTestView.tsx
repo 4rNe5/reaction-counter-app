@@ -303,13 +303,11 @@ export default function ReactionTestView() {
           {(state === 'result' || state === 'tooEarly' || state === 'failed') && '다시하기!'}
         </Text>
       </TouchableOpacity>
-
-      {/* 기록 저장하기 버튼 */}
-      {(state === 'result') && (
-        <TouchableOpacity style={styles.saveButton} onPress={handleSaveButtonPress}>
-          <Text style={styles.saveButtonText}>기록 저장하기!</Text>
-        </TouchableOpacity>
-      )}
+        {(state === 'result') && (
+          <TouchableOpacity style={styles.saveButton} onPress={handleSaveButtonPress}>
+            <Text style={styles.saveButtonText}>기록 저장하기!</Text>
+          </TouchableOpacity>
+        )}
     </View>
   );
 };
@@ -396,7 +394,7 @@ const styles = StyleSheet.create({
   restartButton: {
     backgroundColor: '#ea411b',
     padding: 15,
-    width: 240,
+    width: 260,
     height: 80,
     borderRadius: 80,
     marginTop: 20,
@@ -420,15 +418,36 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 28,
   },
+  buttonContainer: {
+    marginTop: 6,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 74,
+  },
   saveButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#4184cf',
+    padding: 15,
+    marginTop: 25,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonText: {
+    fontFamily: 'NeoDunggeunmoPro',
+    color: '#ffffff',
+    fontSize: 20,
+  },
+  shareButton: {
+    backgroundColor: '#26b120',
     padding: 15,
     marginTop: 20,
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveButtonText: {
+  shareButtonText: {
     fontFamily: 'NeoDunggeunmoPro',
     color: '#ffffff',
     fontSize: 20,
