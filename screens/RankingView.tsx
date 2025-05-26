@@ -11,7 +11,7 @@ interface RankingItem {
   created: string;
 }
 
-const RankingView: React.FC = () => {
+function RankingView() {
   const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 

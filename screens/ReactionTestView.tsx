@@ -29,7 +29,7 @@ const MIN_REACTION_TIME = 80;
 const REACTION_TIME_ADJUSTMENT = 60;
 
 
-const ReactionTestView: React.FC = () => {
+function ReactionTestView() {
   const [state, setState] = useState<TestState>('ready');
   const [reactionTime, setReactionTime] = useState<number | null>(null);
   const [showResults, setShowResults] = useState(false);

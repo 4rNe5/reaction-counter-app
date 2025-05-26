@@ -10,7 +10,7 @@ interface ReactionResult {
 
 const STORAGE_KEY = '@reaction_results';
 
-const MyRecordView: React.FC = () => {
+function MyRecordView() {
   const [results, setResults] = useState<ReactionResult[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
