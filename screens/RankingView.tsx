@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList, RefreshControl } from "react-native";
 import PocketBase from 'pocketbase';
 import { API_URL } from "../api";
@@ -11,37 +11,43 @@ interface RankingItem {
   created: string;
 }
 
-export default function RankingView() {
-  const pb = new PocketBase(API_URL);
+const RankingView: React.FC = () => {
   const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchRanking = async () => {
+  // PocketBase 인스턴스를 useMemo로 메모이제이션
+  const pb = useMemo(() => new PocketBase(API_URL), []);
+
+  const fetchRanking = useCallback(async (): Promise<void> => {
     try {
-      const result = await pb.collection('reaction_records').getFullList({
+      const result = await pb.collection('reaction_records').getFullList<RankingItem>({
         sort: 'reactionMs',
       });
-      // @ts-ignore
       setRanking(result);
     } catch (error) {
       console.error("Failed to fetch ranking:", error);
+      setRanking([]);
     }
-  };
+  }, [pb]);
+
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    setRefreshing(true);
+    try {
+      await fetchRanking();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [fetchRanking]);
+
 
   useFocusEffect(
     useCallback(() => {
       fetchRanking();
-    }, [])
+    }, [fetchRanking])
   );
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchRanking().then(() => setRefreshing(false));
-  }, []);
-
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string): string => {
     const date = new Date(dateString);
-    date.setHours(date.getHours()); // Convert to Korean time
     return date.toLocaleString('ko-KR', {
       year: '2-digit',
       month: '2-digit',
@@ -50,62 +56,87 @@ export default function RankingView() {
       minute: '2-digit',
       hour12: false
     }).replace(/\./g, '.').replace(',', '');
-  };
+  }, []);
 
-  const renderItem = ({ item, index }: { item: RankingItem; index: number }) => (
-    <View style={[styles.itemContainer, index < 3 && styles.topThree]}>
-      <View style={styles.leftContent}>
-        <Text style={[styles.rank, index < 3 && styles.topThreeText]}>{index + 1}</Text>
-        <Text style={[styles.username, index < 3 && styles.topThreeText]}>{item.userName}</Text>
-      </View>
-      <View style={styles.rightContent}>
-        <Text style={[styles.reactionTime, index < 3 && styles.topThreeText]}>{item.reactionMs} ms</Text>
-        <Text style={styles.date}>{formatDate(item.created)}</Text>
-      </View>
-    </View>
+  const renderRankingItem = useCallback(
+    ({ item, index }: { item: RankingItem; index: number }) => {
+      const isTopThree = index < 3;
+
+      return (
+        <View style={[styles.itemContainer, isTopThree && styles.topThree]}>
+          <View style={styles.leftContent}>
+            <Text style={[styles.rank, isTopThree && styles.topThreeText]}>
+              {index + 1}
+            </Text>
+            <Text style={[styles.username, isTopThree && styles.topThreeText]}>
+              {item.userName}
+            </Text>
+          </View>
+          <View style={styles.rightContent}>
+            <Text style={[styles.reactionTime, isTopThree && styles.topThreeText]}>
+              {item.reactionMs} ms
+            </Text>
+            <Text style={styles.date}>
+              {formatDate(item.created)}
+            </Text>
+          </View>
+        </View>
+      );
+    },
+    [formatDate]
+  );
+
+  const keyExtractor = useCallback(
+    (item: RankingItem) => item.id,
+    []
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.titleFont}>반응속도 랭킹</Text>
+        <Text style={styles.title}>반응속도 랭킹</Text>
       </View>
+
       <FlatList
         data={ranking}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        renderItem={renderRankingItem}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#d3d3d3"
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>랭킹 데이터가 없습니다</Text>
+          </View>
         }
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#232323',
-    padding: 10,
+    padding: 20,
   },
-  titleFont: {
+  titleContainer: {
+    alignSelf: 'flex-start',
+    marginLeft: 5,
+    marginTop: 100,
+    marginBottom: 20,
+  },
+  title: {
     fontFamily: 'NeoDunggeunmoPro',
     color: '#d3d3d3',
     fontSize: 38,
-    marginBottom: 20,
     textAlign: 'center',
-    marginTop: 110,
-  },
-  msText: {
-    fontSize: 24,
-    color: '#ffffff',
-  },
-  titleContainer: {
-    marginRight: 'auto',
-    marginLeft: 15, // MyRecordView와 동일하게 수정
   },
   listContainer: {
     width: '100%',
@@ -159,4 +190,16 @@ const styles = StyleSheet.create({
   topThreeText: {
     color: '#ffd700',
   },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+  },
+  emptyText: {
+    fontFamily: 'NeoDunggeunmoPro',
+    color: '#b8b8b8',
+    fontSize: 18,
+  },
 });
+
+export default RankingView;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -10,83 +10,104 @@ interface ReactionResult {
 
 const STORAGE_KEY = '@reaction_results';
 
-export default function MyRecordView() {
+const MyRecordView: React.FC = () => {
   const [results, setResults] = useState<ReactionResult[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadResults = async () => {
+  const loadResults = useCallback(async (): Promise<void> => {
     try {
       const resultsString = await AsyncStorage.getItem(STORAGE_KEY);
-      if (resultsString) {
-        setResults(JSON.parse(resultsString));
-      }
+      setResults(resultsString ? JSON.parse(resultsString) : []);
     } catch (error) {
-      console.error('Failed to load results', error);
+      console.error('Failed to load results:', error);
+      setResults([]);
     }
-  };
-
-  // Use useFocusEffect to reload the data whenever the view is focused
-  useFocusEffect(
-    React.useCallback(() => {
-      loadResults();
-    }, [])
-  );
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    loadResults().then(() => setRefreshing(false));
   }, []);
 
-  const renderItem = ({ item }: { item: ReactionResult }) => (
-    <View style={styles.resultItem}>
-      <Text style={styles.resultItemTime}>{<Text style={styles.msText}>{item.time}</Text>} ms</Text>
-      <Text style={styles.resultItemDate}>{new Date(item.date).toLocaleString()}</Text>
-    </View>
+  const handleRefresh = useCallback(async (): Promise<void> => {
+    setRefreshing(true);
+    try {
+      await loadResults();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadResults]);
+
+  // 화면이 포커스될 때마다 데이터 로드
+  useFocusEffect(
+    useCallback(() => {
+      loadResults();
+    }, [loadResults])
+  );
+
+  const renderResultItem = useCallback(
+    ({ item }: { item: ReactionResult }) => (
+      <View style={styles.resultItem}>
+        <Text style={styles.resultItemTime}>
+          <Text style={styles.msText}>{item.time}</Text> ms
+        </Text>
+        <Text style={styles.resultItemDate}>
+          {new Date(item.date).toLocaleString()}
+        </Text>
+      </View>
+    ),
+    []
+  );
+
+  const keyExtractor = useCallback(
+    (item: ReactionResult, index: number) => `${item.date}-${index}`,
+    []
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.titleFont}>내 측정기록 보기</Text>
+        <Text style={styles.title}>내 측정기록 보기</Text>
       </View>
+
       <FlatList
         data={results}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.date}
+        renderItem={renderResultItem}
+        keyExtractor={keyExtractor}
         style={styles.resultList}
+        showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#d3d3d3"
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>측정 기록이 없습니다</Text>
+          </View>
         }
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: '#232323',
     padding: 20,
   },
-  titleFont: {
+  titleContainer: {
+    alignSelf: 'flex-start',
+    marginLeft: 5,
+    marginTop: 100,
+    marginBottom: 20,
+  },
+  title: {
     fontFamily: 'NeoDunggeunmoPro',
     color: '#d3d3d3',
     fontSize: 38,
-    marginBottom: 20,
     textAlign: 'center',
-    marginTop: 100,
-  },
-  msText: {
-    fontSize: 24,
-    color: '#ffffff',
-  },
-  titleContainer: {
-    marginRight: 'auto',
-    marginLeft: 5,
   },
   resultList: {
+    flex: 1,
     width: '100%',
     paddingVertical: 10,
     marginBottom: 90,
@@ -105,20 +126,25 @@ const styles = StyleSheet.create({
     fontFamily: 'NeoDunggeunmoPro',
     color: '#ffffff',
   },
+  msText: {
+    fontSize: 24,
+    color: '#ffffff',
+  },
   resultItemDate: {
     fontSize: 15,
     fontFamily: 'NeoDunggeunmoPro',
     color: '#b8b8b8',
   },
-  backButton: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#c34023',
-    borderRadius: 5,
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
   },
-  backButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  emptyText: {
     fontFamily: 'NeoDunggeunmoPro',
+    color: '#b8b8b8',
+    fontSize: 18,
   },
 });
+
+export default MyRecordView;
